@@ -4,7 +4,7 @@ CC = gcc
 OBJS = sam7_pgm.o ihex.o serial.o settings.o cmd.o xmodem.o chip_id.o
 
 sam7_pgm: $(OBJS)
-	$(CC) -o sam7_pgm $(OBJS) -lm
+	$(CC) $(CFLAGS) -o sam7_pgm $(OBJS) -lm
 
 flasher.c flasher.h: flasher.armasm armlst2c
 	arm-elf-as flasher.armasm -o flasher.armobj

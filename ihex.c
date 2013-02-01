@@ -58,6 +58,7 @@ int read_intel_hex(const char *filename)
 	FILE *fp;
 	int i, lineno=0;
 	char buf[1024];
+    char *cret;
 
 	byte_count = 0;
 	end_record_seen = 0;
@@ -74,7 +75,11 @@ int read_intel_hex(const char *filename)
 	}
 	while (!feof(fp)) {
 		*buf = '\0';
-		fgets(buf, sizeof(buf), fp);
+		cret = fgets(buf, sizeof(buf), fp);
+        if (cret == NULL) {
+            printf("%s: error in fgets\n", __FUNCTION__);
+            return -1;
+        }
 		lineno++;
 		if (*buf) {
 			if (parse_hex_line(buf) == 0) {
