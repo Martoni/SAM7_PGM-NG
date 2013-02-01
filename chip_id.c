@@ -27,6 +27,7 @@ static chipinfo_t known_chips[] = {
 //                             num  page lock                         nvm    nvm
 //  name           id_code     page size bits flasharea   ramarea     bits   bits
   {"AT91SAM7S256", 0x270B0940, 1024, 256, 16, 0x00100000, 0x00202000, 0x000, 0x000},
+  {"AT91SAM7S256", 0x270D0940, 1024, 256, 16, 0x00100000, 0x00202000, 0x000, 0x000},
   {"AT91SAM7S128", 0x270A0740,  512, 256,  8, 0x00100000, 0x00202000, 0x000, 0x000},
   {"AT91SAM7S64",  0x27090540,  512, 128, 16, 0x00100000, 0x00202000, 0x000, 0x000},
   {"AT91SAM7S321", 0x27080342,  256, 128,  8, 0x00100000, 0x00202000, 0x000, 0x000},
