@@ -46,6 +46,7 @@ void init_settings(void)
 {
 	const char *home_dir;
 	FILE *fp;
+    char *cret;
 	char buf[1024], *p, *q;
 
 	home_dir = getenv("HOME");
@@ -56,7 +57,11 @@ void init_settings(void)
 		if (fp == NULL) return;
 		while (!feof(fp)) {
 			buf[0] = '\0';
-			fgets(buf, sizeof(buf), fp);
+			cret = fgets(buf, sizeof(buf), fp);
+            if( cret == NULL) {
+                printf("%s: error in fgets\n", __FUNCTION__);
+                return;
+            }
 			if (strncmp(buf, "port:", 5) == 0) {
 				for (p=buf+5; isspace(*p); p++) ;
 				q = rindex(p, '\n'); if (q) *q = '\0';
@@ -85,11 +90,6 @@ void write_settings_file(void)
 	fprintf(fp, "baud: %s\n", baud);
 	fflush(fp);
 	fclose(fp);
-}
-
-const char * port_setting(void)
-{
-	return port;
 }
 
 const char * baud_setting(void)

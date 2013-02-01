@@ -31,7 +31,7 @@
 #include "ihex.h"
 #include "chip_id.h"
 
-#define USAGE "sam7_pgm <firmware.hex>"
+#define USAGE "sam7_pgm <uartdev> <firmware.hex>"
 
 void die(const char *str)
 {
@@ -122,48 +122,31 @@ int main(int argc, char **argv)
 	unsigned int id, word, baud, lockmask;
 	double mclk;
 	int page, bit;
+    char *fdev_name;
 	chipinfo_t *chip;
 
-	if (argc < 2) die(USAGE);
-	r = read_intel_hex(argv[1]);
-	if (r < 0) die("Error reading intel hex file");
-	printf("read %d bytes from %s\n", r, argv[1]);
+	if (argc < 3)
+        die(USAGE);
 
-	printf("opening serial port %s\n", port_setting());
-	open_serial_port(port_setting());
-	
+    fdev_name = argv[1];
+	printf("opening serial port %s\n", fdev_name);
+	open_serial_port(fdev_name);
+
+	r = read_intel_hex(argv[2]);
+	if (r < 0)
+        die("Error reading intel hex file");
+	printf("read %d bytes from %s\n", r, argv[2]);
+
+
 	r = establish_comm_uart();
-	if (r) {
-		//die("not trying recovery");
-		printf("No response from boot agent\n");
-		printf("  Attempting boot agent recovery....\n");
-		printf("  Turning power off, by DTR low\n");
-		set_dtr(0);
-		usleep(20000);
-		printf("  Assert TST/PA0/PA1/PA2 (SAM7S) or ERASE (SAM7X), by RTS low\n");
-		set_rts(0);
-		usleep(150000);
-		printf("  Turning power on, by DTR high\n");
-		set_dtr(1);
-		wait(10.0);
-		printf("  Turning power off, by DTR low\n");
-		set_dtr(0);
-		usleep(150000);
-		printf("  De-assert TST/PA0/PA1/PA2 or ERASE, by RTS high\n");
-		set_rts(1);
-		usleep(20000);
-		printf("  Turning power on, by DTR high\n");
-		set_dtr(1);
-		usleep(250000);
-		r = establish_comm_uart();
-		if (r) {
-			die("Still no response!  Unable to sync with boot agent.");
-		}
+    if (r) {
+			die("No response!  Unable to sync with boot agent.");
 	}
 
 	// read the bootloader ID and show it to the user
 	r = bootloader_version(buf, sizeof(buf));
-	if (r) die("Unable to read boot loader version");
+	if (r)
+        die("Unable to read boot loader version");
 	printf("Bootloader version: \"%s\"\n", buf);
 
 	// read the chip ID
@@ -308,5 +291,4 @@ int main(int argc, char **argv)
 
 	return 0;
 }
-
 
