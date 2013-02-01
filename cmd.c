@@ -89,6 +89,7 @@ int run_code(unsigned int addr)
 {
 	char buf[256];
 	int n;
+    int i;
 
 	input_flush_serial_port();
 	snprintf(buf, sizeof(buf), "G%X#", addr);
@@ -101,9 +102,14 @@ int run_code(unsigned int addr)
 		return -1;
 	} else {
 		buf[n] = '\0';
-		//printf("received %d chars: %s\n", n, buf);
-		if (n > 0 && buf[n-1] == '>') return 0;
-		if (addr == 0 && (buf[0] == 13 || buf[0] == 10)) return 0;
+		printf("received %d chars: %s\n", n, buf);
+        for(i=0; i<n;i++)
+            printf("buf[%d] = %02X\n", i, (unsigned char) buf[i]);
+
+		if (n > 0 && buf[n-1] == '>')
+            return 0;
+		if (addr == 0 && (buf[0] == 13 || buf[0] == 10))
+            return 0;
 	}
 	return -2;
 }
