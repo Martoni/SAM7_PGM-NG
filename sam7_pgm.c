@@ -162,23 +162,27 @@ int main(int argc, char **argv)
 
 	// figure out what speed the CPU is running at
 	r = read_word(DBGU_BRGR, &baud);
-	if (r) die("Unable to read from chip");
+	if (r)
+        die("Unable to read from chip");
 	mclk = 115200.0 * 16.0 * (double)baud;
 	printf("MCLK is approx %.3f MHz\n", mclk / 1e6);
-	if (mclk < 19e6) printf("WARNING: below 19 MHz may be unreliable\n");
-	if (mclk < 1e6) die("MCLK must be at least 1 MHz");
-	if (mclk > 60e6) die ("MCLK can not be over 60 MHz");
-
-	//exit(1);
+	if (mclk < 19e6)
+        printf("WARNING: below 19 MHz may be unreliable\n");
+	if (mclk < 1e6)
+        die("MCLK must be at least 1 MHz");
+	if (mclk > 60e6)
+        die("MCLK can not be over 60 MHz");
 
 	// unlock flash regions, if necessary
 	r = read_word(MC_FSR, &word);
-	if (r) die("error while readying flash status");
+	if (r)
+        die("error while readying flash status");
 	lockmask = (word >> 16) & chip_lock_mask(chip);
 	if (lockmask) {
 		printf("Unlocking flash regions\n");
 		r = unlock_flash_regions(chip, lockmask, mclk);
-		if (r) die("Unable to unlock flash regions");
+		if (r)
+            die("Unable to unlock flash regions");
 		// todo: reread MC_FSR and verify it really did unlock all the regions
 	}
 
@@ -186,13 +190,8 @@ int main(int argc, char **argv)
 	// ...rather than lock bits which need a 1.5 us setting
 
 	r = set_flash_mode(1.0e-6, mclk);
-	if (r) die("Unable to set Flash Mode Register to 1us timing");
-
-#if 0
-	// load the flasher code into RAM
-	r = write_memory(chip->ramarea + chip->pagesize, flasher, FLASHER_SIZE);
-	if (r) die("Error loading flasher code");
-#endif
+	if (r)
+        die("Unable to set Flash Mode Register to 1us timing");
 
 	// now program all the pages
 	printf("Programming flash pages (%d bytes per page):\n", chip->pagesize);
@@ -207,7 +206,6 @@ int main(int argc, char **argv)
 		printf(".");
 		fflush(stdout);
 
-
 		// make sure the flash is ready
 		r = wait_flash_ready();
 		if (r) die("Timeout waiting for flash ready");
@@ -221,26 +219,8 @@ int main(int argc, char **argv)
 
 		// and tell the flash controller to burn it into the flash memory!
 		r = write_word(MC_FCR, (page << 8) | 0x5A000001);
-		if (r) die("error writing flash command\n");
-
-#if 0
-		// transfer the data into RAM
-		printf("Block #%d\n", page);
-		r = write_memory(chip->ramarea, firmware_image + page * chip->pagesize, chip->pagesize);
-		if (r) die("error transfering data to ram");
-
-		// write params needed by the flasher code
-		r = write_word(chip->ramarea + chip->pagesize, chip->flasharea + page * chip->pagesize);
-		if (r) die("error writing flasher param #1 to ram");
-		r = write_word(chip->ramarea + chip->pagesize + 4, page);
-		if (r) die("error writing flasher param #2 to ram");
-		r = write_word(chip->ramarea + chip->pagesize + 8, chip->pagesize);
-		if (r) die("error writing flasher param #3 to ram");
-
-		// and jump to the flasher code to do the work
-		r = run_code(chip->ramarea + chip->pagesize + 16);
-		if (r) die("error running flasher code");
-#endif
+		if (r)
+            die("error writing flash command\n");
 	}
 	r = wait_flash_ready();
 	if (r) die("Timeout waiting for flash ready");
@@ -273,14 +253,6 @@ int main(int argc, char **argv)
 			}
 		}
 	}
-
-#if 0
-	// read the first 64 bytes of memory, just as a simple check
-	for (i=0; i<64; i+=4) {
-		r = read_word(i, &word);
-		printf("addr=%02X, data=%08X, r=%d\n", i, word, r);
-	}
-#endif
 
 	r = run_code(0);
 	if (r == 0) {

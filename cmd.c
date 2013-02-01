@@ -94,6 +94,7 @@ int run_code(unsigned int addr)
 	snprintf(buf, sizeof(buf), "G%X#", addr);
 	printf("sending command \"%s\"\n", buf);
 	write_serial_port(buf, strlen(buf));
+
 	n = read_serial_port_timeout((unsigned char *)buf, sizeof(buf)-1, ">", 1.5);
 	if (n < 0) {
 		printf("error reading, n=%d\n", n);
